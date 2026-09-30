@@ -10,7 +10,9 @@ resource "github_repository" "this" {
   auto_init              = false
   delete_branch_on_merge = true
 
-  vulnerability_alerts = true
+  allow_merge_commit = false
+  allow_rebase_merge = false
+  allow_squash_merge = true
 }
 
 resource "github_branch_protection" "main" {
