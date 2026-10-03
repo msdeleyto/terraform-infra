@@ -1,0 +1,89 @@
+name: Terraform Lint
+
+on:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - '**/*.tf'
+    - '**/*.tfvars'
+    - '.terraform.lock.hcl'
+    - '.github/workflows/terraform-lint.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform-fmt:
+    name: Formatting
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      with:
+        terraform_version: "1.15.9"
+
+    - name: Terraform Format Check
+      shell: bash
+      run: terraform fmt -check -recursive -diff
+
+  terraform-validate:
+    name: Validation
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      with:
+        terraform_version: "1.15.9"
+
+    - name: Terraform Init
+      shell: bash
+      run: terraform init -backend=false
+
+    - name: Terraform Validate
+      shell: bash
+      run: terraform validate -no-color
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Setup TFLint
+      uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
+      with:
+        tflint_version: v0.54.0
+
+    - name: Init TFLint
+      shell: bash
+      run: tflint --init
+
+    - name: Run TFLint
+      shell: bash
+      run: tflint --format=compact --no-color --recursive
+
+  ci-gate:
+    name: CI Gate
+    if: always()
+    needs:
+    - terraform-fmt
+    - terraform-validate
+    - tflint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check job results
+      if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      run: exit 1
