@@ -15,14 +15,53 @@ resource "github_repository" "this" {
   allow_squash_merge = true
 }
 
-resource "github_branch_protection" "main" {
-  repository_id = github_repository.this.node_id
-  pattern       = "main"
+resource "github_repository_ruleset" "this" {
+  name        = "main"
+  repository  = var.github_repo_name
+  target      = "branch"
+  enforcement = "active"
 
-  required_pull_request_reviews {
-    required_approving_review_count = 0
-    dismiss_stale_reviews           = true
+  bypass_actors {
+    actor_id    = 4307018
+    actor_type  = "Integration"
+    bypass_mode = "always"
   }
 
-  enforce_admins = false
+  bypass_actors {
+    actor_id    = 21179154
+    actor_type  = "User"
+    bypass_mode = "always"
+  }
+
+  conditions {
+    ref_name {
+      include = ["~DEFAULT_BRANCH"]
+      exclude = []
+    }
+  }
+
+  rules {
+    deletion            = true
+    required_signatures = true
+    non_fast_forward    = true
+
+    pull_request {
+      allowed_merge_methods = ["squash"]
+    }
+
+    required_status_checks {
+      required_check {
+        context        = "PR checks / ci-gate"
+        integration_id = 15368
+      }
+    }
+  }
+}
+
+resource "github_repository_file" "renovate" {
+  repository          = var.github_repo_name
+  file                = ".github/workflows/tf_renovate.yml"
+  content             = file("./templates/renovate.yml")
+  commit_message      = "create renovate workflow"
+  overwrite_on_create = true
 }
