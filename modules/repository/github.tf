@@ -61,7 +61,7 @@ resource "github_repository_ruleset" "this" {
 resource "github_repository_file" "renovate" {
   repository          = var.github_repo_name
   file                = ".github/workflows/tf_renovate.yaml"
-  content             = file("./templates/renovate.yaml")
+  content             = file("${path.module}/templates/renovate.yaml")
   commit_message      = "create renovate workflow"
   overwrite_on_create = true
 }

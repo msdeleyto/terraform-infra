@@ -6,11 +6,9 @@ variable "github_repo_name" {
 variable "github_repo_description" {
   description = "Description of the GitHub repository"
   type        = string
-  default     = ""
 }
 
 variable "github_repo_visibility" {
   description = "Repository visibility (public or private)"
   type        = string
-  default     = "public"
 }
