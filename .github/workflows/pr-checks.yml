@@ -4,11 +4,6 @@ on:
   pull_request:
     branches:
     - main
-    paths:
-    - '**/*.tf'
-    - '**/*.tfvars'
-    - '.terraform.lock.hcl'
-    - '.github/workflows/terraform-lint.yaml'
   workflow_dispatch:
 
 permissions:
@@ -19,8 +14,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      terraform: ${{ steps.filter.outputs.terraform }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Check for Terraform changes
+      uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
+      id: filter
+      with:
+        filters: |
+          terraform:
+            - '**/*.tf'
+            - '**/*.tfvars'
+            - '.terraform.lock.hcl'
+            - '.github/workflows/pr-checks.yml'
+
   terraform-fmt:
     name: Formatting
+    needs: detect-changes
+    if: needs.detect-changes.outputs.terraform == 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -37,6 +57,8 @@ jobs:
 
   terraform-validate:
     name: Validation
+    needs: detect-changes
+    if: needs.detect-changes.outputs.terraform == 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -57,6 +79,8 @@ jobs:
 
   tflint:
     name: TFLint
+    needs: detect-changes
+    if: needs.detect-changes.outputs.terraform == 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
