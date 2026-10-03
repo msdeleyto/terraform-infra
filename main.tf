@@ -9,3 +9,7 @@ provider "aws" {
 module "terraform_infra" {
   source = "./projects/terraform-infra"
 }
+
+module "gh_actions" {
+  source = "./projects/gh-actions"
+}

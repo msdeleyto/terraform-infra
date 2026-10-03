@@ -49,10 +49,16 @@ resource "github_repository_ruleset" "this" {
       allowed_merge_methods = ["squash"]
     }
 
-    required_status_checks {
-      required_check {
-        context        = "CI Gate"
-        integration_id = 15368
+    dynamic "required_status_checks" {
+      for_each = length(var.required_status_checks) > 0 ? [1] : []
+      content {
+        dynamic "required_check" {
+          for_each = var.required_status_checks
+          content {
+            context        = required_check.value.context
+            integration_id = required_check.value.integration_id
+          }
+        }
       }
     }
   }
