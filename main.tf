@@ -7,9 +7,5 @@ provider "aws" {
 }
 
 module "terraform_infra" {
-  source = "./terraform-infra"
-
-  github_repo_name        = "terraform-infra"
-  github_repo_description = "Infrastructure as Code — AWS, GitHub, and beyond"
-  github_repo_visibility  = "public"
+  source = "./projects/terraform-infra"
 }

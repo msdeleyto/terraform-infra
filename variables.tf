@@ -3,9 +3,3 @@ variable "aws_region" {
   type        = string
   default     = "us-east-1"
 }
-
-variable "project" {
-  description = "Top-level project / organisation name used for naming and tagging"
-  type        = string
-  default     = "terraform-infra"
-}
