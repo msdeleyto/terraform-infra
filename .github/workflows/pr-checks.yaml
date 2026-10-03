@@ -35,7 +35,7 @@ jobs:
             - '**/*.tf'
             - '**/*.tfvars'
             - '.terraform.lock.hcl'
-            - '.github/workflows/pr-checks.yml'
+            - '.github/workflows/pr-checks.yaml'
 
   terraform-fmt:
     name: Formatting
