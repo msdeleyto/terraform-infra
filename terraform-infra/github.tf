@@ -51,7 +51,7 @@ resource "github_repository_ruleset" "this" {
 
     required_status_checks {
       required_check {
-        context        = "PR checks / ci-gate"
+        context        = "PR checks / CI Gate"
         integration_id = 15368
       }
     }
